@@ -1,0 +1,44 @@
+---
+title: "CO2"
+author: "Julien JACQUES"
+date: "2/19/2020"
+output: pdf_document
+---
+
+We extract training and test set
+```{r}
+co2_train=window(co2,start=c(1959,1),end=c(1989,12))
+co2_test=window(co2,start=c(1990,1),end=c(1997,12))
+```
+
+We can plot both
+```{r}
+plot(co2_train,xlim=c(1960,2010),ylim=c(300,400))
+lines(co2_test,lty=2)
+```
+
+We see a trend and a seasonal pattern, probably additive.
+```{r}
+library(forecast)
+h=hw(co2_train,seasonal='additive',damped=FALSE,h=96)
+plot(co2_train,xlim=c(1960,2010),ylim=c(300,400))
+lines(co2_test,lty=2)
+lines(h$mean,col=2)
+print(sqrt(mean((h$mean-co2_test)^2)))
+```
+
+We can compare with a damped version, but the result are worse
+```{r}
+h=hw(co2_train,seasonal='additive',damped=TRUE,h=96)
+plot(co2_train,xlim=c(1960,2010),ylim=c(300,400))
+lines(co2_test,lty=2)
+lines(h$mean,col=2)
+lines(h$mean,col=3)
+print(sqrt(mean((h$mean-co2_test)^2)))
+```
+
+Let's finish by predict the next 10 years 
+```{r}
+h=hw(co2,seasonal='additive',damped=FALSE,h=120)
+autoplot(co2)+autolayer(h)
+```
