@@ -1,8 +1,6 @@
 ---
 title: "San Francisco precipitation"
-author: "Julien JACQUES"
-date: "2/19/2020"
-output: pdf_document
+
 ---
 
 We extract training and test set
