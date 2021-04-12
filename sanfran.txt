@@ -1,0 +1,51 @@
+---
+title: "San Francisco precipitation"
+author: "Julien JACQUES"
+date: "2/19/2020"
+output: pdf_document
+---
+
+We extract training and test set
+```{r}
+data=scan(file="http://eric.univ-lyon2.fr/~jjacques/Download/DataSet/sanfran.dat",skip=1)
+sanfran<-ts(data,start=c(1932,1),end=c(1966,12),freq=12)
+library(forecast)
+sanfran_train=window(sanfran,,start=c(1932,1),end=c(1963,12))
+sanfran_test=window(sanfran,,start=c(1964,1),end=c(1966,12))
+```
+
+We can plot both
+```{r}
+plot(sanfran_train,xlim=c(1932,1970),ylim=c(0,120))
+lines(sanfran_test,lty=2)
+```
+
+We see a seasonal pattern, probably additive.
+```{r}
+library(forecast)
+h=hw(sanfran_train,seasonal='additive',damped=FALSE,h=36)
+plot(sanfran_train,xlim=c(1932,1970),ylim=c(0,120))
+lines(sanfran_test,lty=2)
+lines(h$mean,col=2)
+print(sqrt(mean((h$mean-sanfran_test)^2)))
+```
+
+We can compare with a damped version, the result are slightly better
+```{r}
+hd=hw(sanfran_train,seasonal='additive',damped=TRUE,h=36)
+plot(sanfran_train,xlim=c(1932,1970),ylim=c(0,120))
+lines(sanfran_test,lty=2)
+lines(hd$mean,col=3)
+print(sqrt(mean((hd$mean-sanfran_test)^2)))
+```
+
+We can zoom on the prediction
+```{r}
+plot(sanfran_test,xlim=c(1964,1967),ylim=c(0,120))
+lines(sanfran_test,lty=2)
+lines(h$mean,col=2)
+lines(hd$mean,col=3)
+legend('topleft',col=1:3,lty=1,legend=c('true','forecast with HW','forecast with damped HW'))
+```
+
+The difference is almost null between HW and its damped version. Indeed, if we have a look to the $\phi$ parameter, it is very close to 1 ($\phi=0.9725$): the damping effect is almost null.
